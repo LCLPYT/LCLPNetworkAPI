@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+    id 'org.ajoberstar.grgit' version '4.1.0'
+}
+
+apply plugin: 'maven-publish'
+
+def getVersion = {
+    // TAG-offset-hash
+    def raw = grgit.describe(longDescr: true, tags:true)
+    def desc = (raw == null ? '0.0-0-unknown' : grgit.describe(longDescr: true, tags:true)).split('-') as List
+    def hash = desc.remove(desc.size() - 1)
+    def offset = desc.remove(desc.size() - 1)
+    def tag = desc.join('-')
+    def branch = grgit.branch.current().name
+    if (branch in ['master', 'HEAD'])
+        branch = null
+    SPEC_VERSION = tag
+    return "${tag}.${offset}${t -> if (branch != null) t << '-' + branch}".toString()
+}
+
+group 'work.lclpnet'
+archivesBaseName = 'lclpnetwork-api'
+version getVersion()
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
