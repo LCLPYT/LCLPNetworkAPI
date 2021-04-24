@@ -5,11 +5,15 @@ plugins {
 
 apply plugin: 'maven-publish'
 
+ext {
+    SPEC_VERSION = '0.0'
+}
+
 def getVersion = {
     // TAG-offset-hash
     def raw = grgit.describe(longDescr: true, tags:true)
     def desc = (raw == null ? '0.0-0-unknown' : grgit.describe(longDescr: true, tags:true)).split('-') as List
-    def hash = desc.remove(desc.size() - 1)
+    desc.remove(desc.size() - 1)
     def offset = desc.remove(desc.size() - 1)
     def tag = desc.join('-')
     def branch = grgit.branch.current().name
@@ -18,6 +22,11 @@ def getVersion = {
     SPEC_VERSION = tag
     return "${tag}.${offset}${t -> if (branch != null) t << '-' + branch}".toString()
 }
+
+def privateProps = new Properties()
+def privatePropsFile = file("private.properties");
+if(privatePropsFile.exists())
+    privatePropsFile.withInputStream { privateProps.load(it) }
 
 group 'work.lclpnet'
 archivesBaseName = 'lclpnetwork-api'
@@ -28,10 +37,41 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.google.code.gson:gson:2.8.6'
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
 test {
     useJUnitPlatform()
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier.set($/sources/$)
+    from(sourceSets.main.allJava)
+}
+
+publishing {
+    publications {
+        myPublication(MavenPublication) {
+            artifact sourcesJar
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            if (privateProps.containsKey('mavenPassword')
+                    && privateProps.containsKey('mavenHost')
+                    && privateProps.containsKey('mavenUser')) {
+                credentials {
+                    username privateProps.getProperty('mavenUser');
+                    password privateProps.getProperty('mavenPassword');
+                }
+                url privateProps.getProperty('mavenHost');
+            } else {
+                url "file:///${project.projectDir}/repo"
+            }
+        }
+    }
 }
