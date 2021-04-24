@@ -37,6 +37,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.google.code.findbugs:jsr305:3.0.0'
     implementation 'com.google.code.gson:gson:2.8.6'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

@@ -7,11 +7,11 @@
 package work.lclpnet.lclpnetwork;
 
 import com.google.gson.JsonElement;
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
 import work.lclpnet.lclpnetwork.network.APIResponse;
 import work.lclpnet.lclpnetwork.util.APIException;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ConnectException;
@@ -36,7 +36,7 @@ public class LCLPNetwork {
      *
      * @return The host that should be used to exchange API requests.
      */
-    @NotNull
+    @Nonnull
     public String getHost() {
         return this.host;
     }
