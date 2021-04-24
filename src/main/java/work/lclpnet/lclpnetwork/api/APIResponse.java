@@ -4,7 +4,7 @@
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
 
-package work.lclpnet.lclpnetwork.network;
+package work.lclpnet.lclpnetwork.api;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -95,6 +95,18 @@ public class APIResponse {
         } catch (ClassCastException e) {
             return null;
         }
+    }
+
+    public boolean isUnauthenticated() {
+        return responseCode == 401 && "{\"message\":\"Unauthenticated.\"}".equals(rawError);
+    }
+
+    public boolean hasInvalidScopes() {
+        if(responseCode != 403) return false;
+
+        JsonObject obj = this.getErrorAs(JsonObject.class);
+        JsonElement elem = obj.get("message");
+        return "Invalid scope(s) provided.".equals(elem.getAsString());
     }
 
     public boolean hasValidationViolations() {

@@ -4,7 +4,7 @@
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
 
-package work.lclpnet.lclpnetwork.network;
+package work.lclpnet.lclpnetwork.api;
 
 import java.util.List;
 import java.util.Objects;

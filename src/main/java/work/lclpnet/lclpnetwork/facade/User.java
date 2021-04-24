@@ -11,24 +11,44 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
+/**
+ * Represents a LCLPNetwork user.
+ */
 public class User extends JsonSerializable {
 
 	@Expose
 	private int id;
 	@Expose
 	private String name;
+	@Expose(serialize = false)
+	private String email;
+	@Expose(serialize = false)
+	@SerializedName("email_verified_at")
+	private Date emailVerifiedAt;
 	@Expose
 	@SerializedName("created_at")
 	private Date createdAt;
+	@Expose
+	@SerializedName("updated_at")
 	private Date updatedAt;
+	@Expose
+	@SerializedName("name_changed_at")
 	private Date nameChangedAt;
-	
+
 	public int getId() {
 		return id;
 	}
 	
 	public String getName() {
 		return name;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public Date getEmailVerifiedAt() {
+		return emailVerifiedAt;
 	}
 
 	public Date getCreatedAt() {

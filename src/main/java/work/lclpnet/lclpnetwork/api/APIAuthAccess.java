@@ -4,15 +4,15 @@
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
 
-package work.lclpnet.lclpnetwork;
+package work.lclpnet.lclpnetwork.api;
 
 import java.util.function.Consumer;
 
-public class AuthLCLPNetwork extends LCLPNetwork {
+public class APIAuthAccess extends APIAccess {
 
     protected final String accessToken;
 
-    public AuthLCLPNetwork(String accessToken) {
+    public APIAuthAccess(String accessToken) {
         this.accessToken = accessToken;
     }
 
@@ -22,14 +22,9 @@ public class AuthLCLPNetwork extends LCLPNetwork {
     }
 
     public void isAccessTokenValid(Consumer<Boolean> callback) {
-        this.sendAPIRequest("api/auth/user", "GET", null, resp -> {
-            if(resp.isNoConnection()) {
-                callback.accept(null);
-                return;
-            }
-
-            callback.accept(resp.isNoConnection() ? null : resp.getResponseCode() == 200);
-        });
+        this.sendAPIRequest("api/auth", "GET", null,
+                resp -> callback.accept(resp.isNoConnection() ? null : resp.getResponseCode() == 200)
+        );
     }
 
 }

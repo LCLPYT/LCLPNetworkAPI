@@ -4,11 +4,9 @@
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
 
-package work.lclpnet.lclpnetwork;
+package work.lclpnet.lclpnetwork.api;
 
 import com.google.gson.JsonElement;
-import work.lclpnet.lclpnetwork.network.APIResponse;
-import work.lclpnet.lclpnetwork.util.APIException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,14 +19,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import static work.lclpnet.lclpnetwork.util.APIException.NO_CONNECTION;
-
 /**
  * Central API access class.
  */
-public class LCLPNetwork {
+public class APIAccess {
 
     protected String host = "https://lclpnet.work";
+    protected boolean throwConnectionError = true, throwAuthError = true;
 
     /**
      * Get the host to which API will be sent to.
@@ -48,6 +45,22 @@ public class LCLPNetwork {
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public boolean doesThrowConnectionError() {
+        return throwConnectionError;
+    }
+
+    public void setThrowConnectionError(boolean throwConnectionError) {
+        this.throwConnectionError = throwConnectionError;
+    }
+
+    public boolean doesThrowAuthError() {
+        return throwAuthError;
+    }
+
+    public void setThrowAuthError(boolean throwAuthError) {
+        this.throwAuthError = throwAuthError;
     }
 
     /**
@@ -107,9 +120,15 @@ public class LCLPNetwork {
 
                 conn.disconnect();
 
+                if (this.throwAuthError) {
+                    if(response.isUnauthenticated()) throw APIException.UNAUTHENTICATED;
+                    else if(response.hasInvalidScopes()) throw APIException.INVALID_SCOPES;
+                }
+
                 if (callback != null) callback.accept(response);
             } catch (ConnectException e) {
-                if (callback != null) callback.accept(APIResponse.NO_CONNECTION);
+                if (this.throwConnectionError) throw APIException.NO_CONNECTION;
+                else if (callback != null) callback.accept(APIResponse.NO_CONNECTION);
             } catch (IOException e) {
                 throw new APIException(e);
             }
@@ -119,7 +138,7 @@ public class LCLPNetwork {
     /**
      * The main instance of the public LCLPNetwork API.
      */
-    public static final LCLPNetwork INSTANCE = new LCLPNetwork();
+    public static final APIAccess PUBLIC = new APIAccess();
 
     /**
      * Tries to login with an oauth access token.
@@ -128,18 +147,28 @@ public class LCLPNetwork {
      * @param callback AuthLCLPNetwork object receiver. Will get null if there was an error.
      * @throws APIException If the login process could not be finished.
      */
-    public static void withAuth(String accessToken, Consumer<AuthLCLPNetwork> callback) throws APIException {
-        AuthLCLPNetwork api = new AuthLCLPNetwork(accessToken);
-        api.isAccessTokenValid(valid -> {
+    public static void withAuth(String accessToken, Consumer<APIAuthAccess> callback) throws APIException {
+        withAuthCheck(new APIAuthAccess(accessToken), callback);
+    }
+
+    /**
+     * Tries to login with an oauth access token.
+     *
+     * @param access An AuthAPIAccess instance.
+     * @param callback AuthLCLPNetwork object receiver. Will get null if there was an error.
+     * @throws APIException If the login process could not be finished.
+     */
+    public static void withAuthCheck(final APIAuthAccess access, Consumer<APIAuthAccess> callback) throws APIException {
+        access.isAccessTokenValid(valid -> {
             if(valid == null) {
                 callback.accept(null);
-                throw NO_CONNECTION;
+                throw APIException.NO_CONNECTION;
             }
             else if(!valid) {
                 callback.accept(null);
                 throw new APIException("API access token is not valid!");
             }
-            else callback.accept(api);
+            else callback.accept(access);
         });
     }
 
