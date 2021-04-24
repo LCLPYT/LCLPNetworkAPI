@@ -36,6 +36,7 @@ public class JsonBuilder {
     /**
      * Begin a new JsonObject.
      * This method should be used on JsonArray builders.
+     * @return A new object child builder.
      */
     public JsonBuilder beginObject() {
         ensureArray();
@@ -46,6 +47,7 @@ public class JsonBuilder {
      * Begin a new JsonObject.
      * This method should be used on JsonObject builders.
      * @param key The key of the finished JsonObject for this JsonObject builder.
+     * @return A new object child builder.
      */
     public JsonBuilder beginObject(String key) {
         return begin(key, false);
@@ -54,6 +56,7 @@ public class JsonBuilder {
     /**
      * End the current JsonObject.
      * This should only be called on JsonObject child builders.
+     * @return The parent builder.
      */
     public JsonBuilder endObject() {
         ensureObject();
@@ -64,6 +67,7 @@ public class JsonBuilder {
     /**
      * Begin a new JsonArray.
      * This method should be used on JsonArray builders.
+     * @return A new child array builder.
      */
     public JsonBuilder beginArray() {
         ensureArray();
@@ -74,6 +78,7 @@ public class JsonBuilder {
      * Begin a new JsonArray.
      * This method should be used on JsonObject builders.
      * @param key The key of the finished JsonArray for this JsonObject builder.
+     * @return A new child array builder.
      */
     public JsonBuilder beginArray(String key) {
         return begin(key, true);
@@ -82,6 +87,7 @@ public class JsonBuilder {
     /**
      * End the current JsonArray.
      * This should only be called on JsonArray child builders.
+     * @return The parent builder.
      */
     public JsonBuilder endArray() {
         ensureArray();
@@ -110,6 +116,7 @@ public class JsonBuilder {
      *
      * @param key The key of the property.
      * @param value The value of the property.
+     * @return The same builder.
      */
     public JsonBuilder set(String key, Object value) {
         ensureObject();
@@ -136,6 +143,7 @@ public class JsonBuilder {
      * This should only be called on JsonArray builders.
      *
      * @param element The element to add.
+     * @return The same builder.
      */
     public JsonBuilder add(Object element) {
         ensureArray();

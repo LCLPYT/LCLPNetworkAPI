@@ -1,9 +1,14 @@
+/*
+ * Copyright (c) 2021 LCLP.
+ *
+ * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
+ */
+
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'maven-publish'
     id 'org.ajoberstar.grgit' version '4.1.0'
 }
-
-apply plugin: 'maven-publish'
 
 ext {
     SPEC_VERSION = '0.0'
@@ -53,11 +58,22 @@ task sourcesJar(type: Jar) {
     from(sourceSets.main.allJava)
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 publishing {
     publications {
-        myPublication(MavenPublication) {
-            artifact sourcesJar
-            artifact jar
+        mavenJava(MavenPublication) {
+            artifactId = 'lclpnetwork-api'
+            from components.java
+
+            pom {
+                name = 'LCLPNetworkAPI'
+                description = 'A Java library to access the LCLPNetwork API.'
+                url = 'https://github.com/LCLPYT/LCLPNetworkAPI'
+            }
         }
     }
     repositories {
