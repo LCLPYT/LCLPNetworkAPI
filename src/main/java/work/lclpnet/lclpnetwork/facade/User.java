@@ -7,7 +7,9 @@
 package work.lclpnet.lclpnetwork.facade;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
+import work.lclpnet.lclpnetwork.util.JsonDateAdapter;
 
 import java.util.Date;
 
@@ -17,7 +19,7 @@ import java.util.Date;
 public class User extends JsonSerializable {
 
 	@Expose
-	private int id;
+	private long id;
 	@Expose
 	private String name;
 	@Expose(serialize = false)
@@ -33,9 +35,10 @@ public class User extends JsonSerializable {
 	private Date updatedAt;
 	@Expose
 	@SerializedName("name_changed_at")
+	@JsonAdapter(JsonDateAdapter.YMDHMS.class)
 	private Date nameChangedAt;
 
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 	

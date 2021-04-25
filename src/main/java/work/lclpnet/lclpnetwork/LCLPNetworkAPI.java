@@ -72,7 +72,6 @@ public class LCLPNetworkAPI {
     @Scopes("revoke-self")
     public void revokeCurrentToken(@Nullable Consumer<Boolean> callback) {
         api.get("api/auth/revoke-token", callback == null ? null : resp -> {
-            System.out.println("revoke: " + resp);
             if(resp.getResponseCode() != 200) {
                 callback.accept(false);
                 return;
