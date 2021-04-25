@@ -8,8 +8,13 @@ package work.lclpnet.lclpnetwork.facade;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+
 import static work.lclpnet.lclpnetwork.LCLPNetworkAPI.GSON;
 
+/**
+ * Objects with this super class will be JSON-serialized with their toString() methods.
+ * Additionally, they will have all the helper methods to serialize / deserialize available.
+ */
 public class JsonSerializable {
 
 	protected transient Gson gson = GSON;

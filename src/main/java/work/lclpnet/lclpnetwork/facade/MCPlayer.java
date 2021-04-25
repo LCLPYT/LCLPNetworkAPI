@@ -14,6 +14,9 @@ import work.lclpnet.lclpnetwork.ext.LCLPMinecraftAPI;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Represents a minecraft player who has played once on a LCLPNetwork minecraft server.
+ */
 public class MCPlayer extends JsonSerializable {
 
     @Expose

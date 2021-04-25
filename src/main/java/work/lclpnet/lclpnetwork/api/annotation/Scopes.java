@@ -11,10 +11,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Used to mark API request methods that require specific scopes.
+ * The required scopes can be checked with {@link Scopes#value()}
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Scopes {
 
+    /**
+     * Get a list of scopes required to call this API method.
+     * @return An array of scope strings.
+     */
     String[] value();
 
 }

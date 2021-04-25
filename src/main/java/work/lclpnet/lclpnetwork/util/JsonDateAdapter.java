@@ -42,6 +42,9 @@ public class JsonDateAdapter extends TypeAdapter<Date> {
         }
     }
 
+    /**
+     * A date adapter that will serialize / deserialize with the "year-month-day hour:minute:second" (yyyy-MM-dd HH:mm:ss) format.
+     */
     public static class YMDHMS extends JsonDateAdapter {
 
         public YMDHMS() {

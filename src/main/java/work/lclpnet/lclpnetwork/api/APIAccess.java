@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Supplier;
 
 /**
@@ -27,7 +28,6 @@ import java.util.function.Supplier;
 public class APIAccess {
 
     protected String host = "https://lclpnet.work";
-    protected boolean throwConnectionError = true, throwAuthError = true;
     protected Executor customExecutor = null;
 
     /**
@@ -46,30 +46,28 @@ public class APIAccess {
         return null;
     }
 
+    /**
+     * Sets the host of the API.
+     * Use the following format: "https://example.com".
+     * Please mind that there should not be a slash at the end, since the host will be concatenated later on.
+     * @param host The host to use.
+     */
     public void setHost(String host) {
         this.host = host;
     }
 
-    public boolean doesThrowConnectionError() {
-        return throwConnectionError;
-    }
-
-    public void setThrowConnectionError(boolean throwConnectionError) {
-        this.throwConnectionError = throwConnectionError;
-    }
-
-    public boolean doesThrowAuthError() {
-        return throwAuthError;
-    }
-
-    public void setThrowAuthError(boolean throwAuthError) {
-        this.throwAuthError = throwAuthError;
-    }
-
+    /**
+     * Gets the custom executor of this instance, used to execute the request {@link CompletableFuture}s.
+     * @return The custom executor of this instance, or null if this instance uses the {@link ForkJoinPool#commonPool()} executor.
+     */
     public Executor getCustomExecutor() {
         return customExecutor;
     }
 
+    /**
+     * Sets the custom executor of this instance, used to execute the request {@link CompletableFuture}s.
+     * @param customExecutor A custom {@link Executor} instance.
+     */
     public void setCustomExecutor(Executor customExecutor) {
         this.customExecutor = customExecutor;
     }
@@ -95,7 +93,7 @@ public class APIAccess {
     }
 
     /**
-     * Send an API request and optionally receive the result.
+     * Send an asynchronous API request.
      *
      * @param path The request path for the request. E.g. <code>"api/auth/user"</code> for <code>https://lclpnet.work/api/auth/user</code>.
      * @param requestMethod The HTTP request method.
@@ -112,6 +110,14 @@ public class APIAccess {
         else return CompletableFuture.supplyAsync(supplier, this.customExecutor);
     }
 
+    /**
+     * Send a synchronous API request.
+     *
+     * @param path The request path for the request. E.g. <code>"api/auth/user"</code> for <code>https://lclpnet.work/api/auth/user</code>.
+     * @param requestMethod The HTTP request method.
+     * @param body Optional HTTP post body. Use <code>null</code> for no body.
+     * @return The APIResponse.
+     */
     public APIResponse sendAPIRequestSync(String path, String requestMethod, @Nullable JsonElement body) throws APIException {
         try {
             URL url = new URL(String.format("%s/%s", this.getHost(), path));
@@ -137,15 +143,12 @@ public class APIAccess {
 
             conn.disconnect();
 
-            if (this.throwAuthError) {
-                if(response.isUnauthenticated()) throw APIException.UNAUTHENTICATED;
-                else if(response.hasInvalidScopes()) throw APIException.INVALID_SCOPES;
-            }
+            if(response.isUnauthenticated()) throw APIException.UNAUTHENTICATED;
+            else if(response.hasInvalidScopes()) throw APIException.INVALID_SCOPES;
 
             return response;
         } catch (ConnectException e) {
-            if (this.throwConnectionError) throw APIException.NO_CONNECTION;
-            return APIResponse.NO_CONNECTION;
+            throw APIException.NO_CONNECTION;
         } catch (IOException e) {
             throw new APIException(e);
         }

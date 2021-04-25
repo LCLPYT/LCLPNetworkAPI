@@ -21,7 +21,6 @@ import java.util.List;
 
 public class APIResponse {
 
-    public static final APIResponse NO_CONNECTION = new APIResponse(-1, null, null);
     private final int responseCode;
     private final String rawResponse, rawError;
     private APIError validationViolations = null;
@@ -43,10 +42,6 @@ public class APIResponse {
 
     public String getRawError() {
         return rawError;
-    }
-
-    public boolean isNoConnection() {
-        return NO_CONNECTION.equals(this);
     }
 
     public static APIResponse fromRequest(HttpURLConnection conn) throws IOException {

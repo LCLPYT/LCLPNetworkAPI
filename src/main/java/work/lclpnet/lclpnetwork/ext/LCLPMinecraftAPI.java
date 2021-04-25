@@ -19,8 +19,15 @@ import java.util.concurrent.CompletableFuture;
 
 import static work.lclpnet.lclpnetwork.util.JsonBuilder.object;
 
+/**
+ * A library of LCLPNetwork Minecraft API requests.
+ * @author LCLP
+ */
 public class LCLPMinecraftAPI extends LCLPNetworkAPI {
 
+    /**
+     * The main instance for the public LCLPNetwork Minecraft API.
+     */
     public static final LCLPMinecraftAPI INSTANCE = new LCLPMinecraftAPI(APIAccess.PUBLIC);
 
     /**

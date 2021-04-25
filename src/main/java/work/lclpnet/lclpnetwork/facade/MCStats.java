@@ -16,6 +16,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents the LCLPNetwork minecraft statistics of a {@link MCPlayer}.
+ */
 public class MCStats extends JsonSerializable {
 
     @Expose
@@ -37,6 +40,9 @@ public class MCStats extends JsonSerializable {
         return stats.stream().filter(e -> name.equals(e.name)).findFirst().orElse(null);
     }
 
+    /**
+     * Represents a {@link MCStats} statistics entry.
+     */
     public static class Entry extends JsonSerializable {
 
         @Expose
@@ -66,6 +72,9 @@ public class MCStats extends JsonSerializable {
 
     }
 
+    /**
+     * Specifies the type of an {@link Entry}
+     */
     public enum EntryType {
 
         @SerializedName("general")
@@ -75,6 +84,9 @@ public class MCStats extends JsonSerializable {
 
     }
 
+    /**
+     * Represents the value of an {@link Entry}.
+     */
     public static class Value extends JsonSerializable {
 
         @Expose
@@ -113,6 +125,9 @@ public class MCStats extends JsonSerializable {
 
     }
 
+    /**
+     * Specifies the value type of an {@link Entry}.
+     */
     public enum ValueType {
 
         @SerializedName("int")
