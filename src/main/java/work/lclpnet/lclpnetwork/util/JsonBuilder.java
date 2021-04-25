@@ -153,6 +153,19 @@ public class JsonBuilder {
     }
 
     /**
+     * Adds all the provided elements to the current JsonArray.
+     * This should only be called on JsonArray builders.
+     *
+     * @param elements A list of elements to add.
+     * @return The same builder.
+     */
+    public JsonBuilder addAll(Iterable<?> elements) {
+        ensureArray();
+        if(elements != null) elements.forEach(this::add);
+        return this;
+    }
+
+    /**
      * Creates a finished JsonArray out of this builder.
      * This should only be used on JsonArray root builders.
      *
