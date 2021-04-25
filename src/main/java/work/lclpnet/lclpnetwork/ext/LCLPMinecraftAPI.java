@@ -9,9 +9,12 @@ package work.lclpnet.lclpnetwork.ext;
 import work.lclpnet.lclpnetwork.LCLPNetworkAPI;
 import work.lclpnet.lclpnetwork.api.APIAccess;
 import work.lclpnet.lclpnetwork.facade.MCPlayer;
+import work.lclpnet.lclpnetwork.facade.MCStats;
 import work.lclpnet.lclpnetwork.facade.MCUser;
 import work.lclpnet.lclpnetwork.facade.User;
+import work.lclpnet.lclpnetwork.util.JsonBuilder;
 
+import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 import static work.lclpnet.lclpnetwork.util.JsonBuilder.object;
@@ -110,6 +113,25 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
         return api.post("api/mc/player-by-user-id", object().set("userId", userId).createObject()).thenApply(resp -> {
             if(resp.getResponseCode() != 200) return null;
             else return resp.getResponseAs(MCPlayer.class);
+        });
+    }
+
+    /**
+     * Fetches MCStats of a tracked MCPlayer (UUID).
+     * Will result in null, if no MCPlayer with that UUID is tracked by LCLPNetwork
+     * or if no Minecraft account with that UUID exists.
+     *
+     * @param uuid The UUID of the MCPlayer.
+     * @param modules An optional list of stats modules to fetch. Pass null to receive every module.
+     * @return A completable future that will contain the MCStats.
+     */
+    public CompletableFuture<MCStats> getStats(String uuid, @Nullable Iterable<String> modules) {
+        JsonBuilder builder = object().set("uuid", uuid);
+        if(modules != null) builder = builder.beginArray("modules").addAll(modules).endArray();
+
+        return api.post("api/mc/stats", builder.createObject()).thenApply(resp -> {
+            if(resp.getResponseCode() != 200) return null;
+            else return resp.getResponseAs(MCStats.class);
         });
     }
 
