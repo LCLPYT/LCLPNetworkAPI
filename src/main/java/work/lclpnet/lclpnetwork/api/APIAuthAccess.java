@@ -6,7 +6,7 @@
 
 package work.lclpnet.lclpnetwork.api;
 
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 public class APIAuthAccess extends APIAccess {
 
@@ -21,10 +21,9 @@ public class APIAuthAccess extends APIAccess {
         return accessToken;
     }
 
-    public void isAccessTokenValid(Consumer<Boolean> callback) {
-        this.sendAPIRequest("api/auth", "GET", null,
-                resp -> callback.accept(resp.isNoConnection() ? null : resp.getResponseCode() == 200)
-        );
+    public CompletableFuture<Boolean> isAccessTokenValid() {
+        return this.sendAPIRequest("api/auth", "GET", null)
+                .thenApply(resp -> resp.isNoConnection() ? null : resp.getResponseCode() == 200);
     }
 
 }

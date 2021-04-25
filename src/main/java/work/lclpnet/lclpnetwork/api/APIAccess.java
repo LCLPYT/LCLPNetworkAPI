@@ -17,7 +17,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * Central API access class.
@@ -26,6 +28,7 @@ public class APIAccess {
 
     protected String host = "https://lclpnet.work";
     protected boolean throwConnectionError = true, throwAuthError = true;
+    protected Executor customExecutor = null;
 
     /**
      * Get the host to which API will be sent to.
@@ -63,13 +66,21 @@ public class APIAccess {
         this.throwAuthError = throwAuthError;
     }
 
+    public Executor getCustomExecutor() {
+        return customExecutor;
+    }
+
+    public void setCustomExecutor(Executor customExecutor) {
+        this.customExecutor = customExecutor;
+    }
+
     /**
      * Send a HTTP GET API request.
      * @param path The request path for the request.
-     * @param callback An optional callback which will receive an APIResponse object. Use <code>null</code> to ignore the response.
+     * @return A completable future that will contain the APIResponse.
      */
-    public void get(String path, @Nullable Consumer<APIResponse> callback) {
-        sendAPIRequest(path, "GET", null, callback);
+    public CompletableFuture<APIResponse> get(String path) {
+        return sendAPIRequest(path, "GET", null);
     }
 
     /**
@@ -77,10 +88,10 @@ public class APIAccess {
      *
      * @param path The request path for the request. E.g. <code>"api/auth/user"</code> for <code>https://lclpnet.work/api/auth/user</code>.
      * @param body Optional HTTP post body. Use <code>null</code> for no body.
-     * @param callback An optional callback which will receive an APIResponse object. Use <code>null</code> to ignore the response.
+     * @return A completable future that will contain the APIResponse.
      */
-    public void post(String path, @Nullable JsonElement body, @Nullable Consumer<APIResponse> callback) {
-        sendAPIRequest(path, "POST", body, callback);
+    public CompletableFuture<APIResponse> post(String path, @Nullable JsonElement body) {
+        return sendAPIRequest(path, "POST", body);
     }
 
     /**
@@ -89,50 +100,55 @@ public class APIAccess {
      * @param path The request path for the request. E.g. <code>"api/auth/user"</code> for <code>https://lclpnet.work/api/auth/user</code>.
      * @param requestMethod The HTTP request method.
      * @param body Optional HTTP post body. Use <code>null</code> for no body.
-     * @param callback An optional callback which will receive an APIResponse object. Use <code>null</code> to ignore the response.
+     * @return A completable future that will contain the APIResponse.
      */
-    public void sendAPIRequest(String path, String requestMethod, @Nullable JsonElement body, @Nullable Consumer<APIResponse> callback) {
+    public CompletableFuture<APIResponse> sendAPIRequest(String path, String requestMethod, @Nullable JsonElement body) {
         Objects.requireNonNull(path);
         Objects.requireNonNull(requestMethod);
 
-        new Thread(() -> {
-            try {
-                URL url = new URL(String.format("%s/%s", this.getHost(), path));
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod(requestMethod);
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+        Supplier<APIResponse> supplier = () -> sendAPIRequestSync(path, requestMethod, body);
 
-                String accessToken;
-                if ((accessToken = this.getAccessToken()) != null)
-                    conn.setRequestProperty("Authorization", String.format("Bearer %s", accessToken));
+        if (this.customExecutor == null) return CompletableFuture.supplyAsync(supplier);
+        else return CompletableFuture.supplyAsync(supplier, this.customExecutor);
+    }
 
-                if (body != null) {
-                    conn.setDoOutput(true);
-                    try (OutputStream out = conn.getOutputStream()) {
-                        out.write(body.toString().getBytes(StandardCharsets.UTF_8));
-                        out.flush();
-                    }
+    public APIResponse sendAPIRequestSync(String path, String requestMethod, @Nullable JsonElement body) throws APIException {
+        try {
+            URL url = new URL(String.format("%s/%s", this.getHost(), path));
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(requestMethod);
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+
+            String accessToken;
+            if ((accessToken = this.getAccessToken()) != null)
+                conn.setRequestProperty("Authorization", String.format("Bearer %s", accessToken));
+
+            if (body != null) {
+                conn.setDoOutput(true);
+                try (OutputStream out = conn.getOutputStream()) {
+                    out.write(body.toString().getBytes(StandardCharsets.UTF_8));
+                    out.flush();
                 }
-
-                APIResponse response = APIResponse.fromRequest(conn);
-
-                conn.disconnect();
-
-                if (this.throwAuthError) {
-                    if(response.isUnauthenticated()) throw APIException.UNAUTHENTICATED;
-                    else if(response.hasInvalidScopes()) throw APIException.INVALID_SCOPES;
-                }
-
-                if (callback != null) callback.accept(response);
-            } catch (ConnectException e) {
-                if (this.throwConnectionError) throw APIException.NO_CONNECTION;
-                else if (callback != null) callback.accept(APIResponse.NO_CONNECTION);
-            } catch (IOException e) {
-                throw new APIException(e);
             }
-        }, "API Request").start();
+
+            APIResponse response = APIResponse.fromRequest(conn);
+
+            conn.disconnect();
+
+            if (this.throwAuthError) {
+                if(response.isUnauthenticated()) throw APIException.UNAUTHENTICATED;
+                else if(response.hasInvalidScopes()) throw APIException.INVALID_SCOPES;
+            }
+
+            return response;
+        } catch (ConnectException e) {
+            if (this.throwConnectionError) throw APIException.NO_CONNECTION;
+            return APIResponse.NO_CONNECTION;
+        } catch (IOException e) {
+            throw new APIException(e);
+        }
     }
 
     /**
@@ -144,31 +160,25 @@ public class APIAccess {
      * Tries to login with an oauth access token.
      *
      * @param accessToken An OAuth 2.0 access token, issued by LCLPNetwork.
-     * @param callback AuthLCLPNetwork object receiver. Will get null if there was an error.
      * @throws APIException If the login process could not be finished.
+     * @return A completable future which will contain the APIAuthAccess instance.
      */
-    public static void withAuth(String accessToken, Consumer<APIAuthAccess> callback) throws APIException {
-        withAuthCheck(new APIAuthAccess(accessToken), callback);
+    public static CompletableFuture<APIAuthAccess> withAuth(String accessToken) throws APIException {
+        return withAuthCheck(new APIAuthAccess(accessToken));
     }
 
     /**
      * Tries to login with an oauth access token.
      *
      * @param access An AuthAPIAccess instance.
-     * @param callback AuthLCLPNetwork object receiver. Will get null if there was an error.
      * @throws APIException If the login process could not be finished.
+     * @return A completable future which will contain the APIAuthAccess instance.
      */
-    public static void withAuthCheck(final APIAuthAccess access, Consumer<APIAuthAccess> callback) throws APIException {
-        access.isAccessTokenValid(valid -> {
-            if(valid == null) {
-                callback.accept(null);
-                throw APIException.NO_CONNECTION;
-            }
-            else if(!valid) {
-                callback.accept(null);
-                throw new APIException("API access token is not valid!");
-            }
-            else callback.accept(access);
+    public static CompletableFuture<APIAuthAccess> withAuthCheck(final APIAuthAccess access) throws APIException {
+        return access.isAccessTokenValid().thenApply(valid -> {
+            if(valid == null) throw APIException.NO_CONNECTION;
+            else if(!valid) throw new APIException("API access token is not valid!");
+            else return access;
         });
     }
 

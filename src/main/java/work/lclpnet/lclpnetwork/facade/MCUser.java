@@ -12,7 +12,7 @@ import work.lclpnet.lclpnetwork.api.APIAccess;
 import work.lclpnet.lclpnetwork.ext.LCLPMinecraftAPI;
 
 import java.util.Date;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents a Minecraft LCLPNetwork user, who linked his minecraft account with his LCLPNetwork account.
@@ -59,20 +59,14 @@ public class MCUser extends JsonSerializable {
         return player;
     }
 
-    public void fetchUser(APIAccess access, Consumer<User> callback) {
+    public CompletableFuture<User> fetchUser(APIAccess access) {
         LCLPMinecraftAPI instance = APIAccess.PUBLIC.equals(access) ? LCLPMinecraftAPI.INSTANCE : new LCLPMinecraftAPI(access);
-        instance.getUserByUUID(this.uuid,  user -> {
-            this.user = user;
-            callback.accept(this.user);
-        });
+        return instance.getUserByUUID(this.uuid).thenApply(user -> this.user = user);
     }
 
-    public void fetchPlayer(APIAccess access, Consumer<MCPlayer> callback) {
+    public CompletableFuture<MCPlayer> fetchPlayer(APIAccess access) {
         LCLPMinecraftAPI instance = APIAccess.PUBLIC.equals(access) ? LCLPMinecraftAPI.INSTANCE : new LCLPMinecraftAPI(access);
-        instance.getMCPlayerByUUID(this.uuid,  mcPlayer -> {
-            this.player = mcPlayer;
-            callback.accept(this.player);
-        });
+        return instance.getMCPlayerByUUID(this.uuid).thenApply(mcPlayer -> this.player = mcPlayer);
     }
 
 }

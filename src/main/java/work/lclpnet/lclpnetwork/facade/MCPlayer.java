@@ -12,7 +12,7 @@ import work.lclpnet.lclpnetwork.api.APIAccess;
 import work.lclpnet.lclpnetwork.ext.LCLPMinecraftAPI;
 
 import java.util.Date;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 public class MCPlayer extends JsonSerializable {
 
@@ -53,12 +53,9 @@ public class MCPlayer extends JsonSerializable {
         return language;
     }
 
-    public void fetchMCUser(APIAccess access, Consumer<MCUser> callback) {
+    public CompletableFuture<MCUser> fetchMCUser(APIAccess access) {
         LCLPMinecraftAPI instance = APIAccess.PUBLIC.equals(access) ? LCLPMinecraftAPI.INSTANCE : new LCLPMinecraftAPI(access);
-        instance.getMCUserByUUID(this.uuid,  mcUser -> {
-            this.mcUser = mcUser;
-            callback.accept(this.mcUser);
-        });
+        return instance.getMCUserByUUID(this.uuid).thenApply(mcUser -> this.mcUser = mcUser);
     }
 
 }

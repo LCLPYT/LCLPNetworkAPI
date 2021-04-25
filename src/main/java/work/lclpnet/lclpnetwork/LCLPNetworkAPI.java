@@ -15,9 +15,8 @@ import work.lclpnet.lclpnetwork.api.annotation.AuthRequired;
 import work.lclpnet.lclpnetwork.api.annotation.Scopes;
 import work.lclpnet.lclpnetwork.facade.User;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 import static work.lclpnet.lclpnetwork.util.JsonBuilder.object;
 
@@ -53,12 +52,12 @@ public class LCLPNetworkAPI {
      * Gets a user by id.
      *
      * @param id The id of the user.
-     * @param callback A callback that receives the fetched user.
+     * @return A completable future that will contain the User.
      */
-    public void getUserById(int id, Consumer<User> callback) {
-        api.post("api/auth/user-by-id", object().set("userId", id).createObject(), resp -> {
-            if(resp.getResponseCode() != 200) callback.accept(null);
-            else callback.accept(resp.getExtra(User.class));
+    public CompletableFuture<User> getUserById(int id) {
+        return api.post("api/auth/user-by-id", object().set("userId", id).createObject()).thenApply(resp -> {
+            if(resp.getResponseCode() != 200) return null;
+            else return resp.getExtra(User.class);
         });
     }
 
@@ -66,18 +65,14 @@ public class LCLPNetworkAPI {
      * Revokes the current access token.
      * Similar to a logout.
      *
-     * @param callback An optional callback which receives if the revoke was successful.
+     * @return A completable future that will contain the success result.
      */
     @AuthRequired
     @Scopes("revoke-self")
-    public void revokeCurrentToken(@Nullable Consumer<Boolean> callback) {
-        api.get("api/auth/revoke-token", callback == null ? null : resp -> {
-            if(resp.getResponseCode() != 200) {
-                callback.accept(false);
-                return;
-            }
-
-            callback.accept("{\"message\":\"Successfully logged out\"}".equals(resp.getRawResponse()));
+    public CompletableFuture<Boolean> revokeCurrentToken() {
+        return api.get("api/auth/revoke-token").thenApply(resp -> {
+            if(resp.getResponseCode() != 200) return null;
+            else return "{\"message\":\"Successfully logged out\"}".equals(resp.getRawResponse());
         });
     }
 
@@ -86,35 +81,32 @@ public class LCLPNetworkAPI {
      * If the access token has the scope "identity[email]",
      * the user object will contain the email and verification date.
      *
-     * @param callback A callback that receives the fetched user.
+     * @return A completable future that will contain the User.
      */
     @AuthRequired
     @Scopes("identity")
-    public void getCurrentUser(Consumer<User> callback) {
-        api.get("api/auth/user", resp -> {
-            if(resp.getResponseCode() != 200) callback.accept(null);
-            else callback.accept(resp.getResponseAs(User.class));
+    public CompletableFuture<User> getCurrentUser() {
+        return api.get("api/auth/user").thenApply(resp -> {
+            if(resp.getResponseCode() != 200) return null;
+            else return resp.getResponseAs(User.class);
         });
     }
 
     /**
      * Check, whether the current user has verified his email.
      *
-     * @param callback A callback that will receive the result.
+     * @return A completable future that will contain, whether the current user is logged in.
      */
     @AuthRequired
     @Scopes("identity")
-    public void isCurrentUserVerified(Consumer<Boolean> callback) {
-        api.get("api/auth/verified", resp -> {
-            if(resp.getResponseCode() != 200) {
-                callback.accept(null);
-                return;
-            }
+    public CompletableFuture<Boolean> isCurrentUserVerified() {
+        return api.get("api/auth/verified").thenApply(resp -> {
+            if(resp.getResponseCode() != 200) return null;
 
             JsonObject obj = resp.getResponseAs(JsonObject.class);
             JsonElement elem = obj.get("email_verified");
-            if(elem == null) callback.accept(null);
-            else callback.accept(elem.getAsBoolean());
+            if(elem == null) return null;
+            else return elem.getAsBoolean();
         });
     }
 

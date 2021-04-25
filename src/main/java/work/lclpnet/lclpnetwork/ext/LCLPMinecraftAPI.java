@@ -12,7 +12,7 @@ import work.lclpnet.lclpnetwork.facade.MCPlayer;
 import work.lclpnet.lclpnetwork.facade.MCUser;
 import work.lclpnet.lclpnetwork.facade.User;
 
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 import static work.lclpnet.lclpnetwork.util.JsonBuilder.object;
 
@@ -34,10 +34,10 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
      * Will result in null, if nobody linked a minecraft account with that uuid.
      *
      * @param uuid The UUID, with dashes.
-     * @param callback A callback that receives the fetched User.
+     * @return A completable future that will contain the User.
      */
-    public void getUserByUUID(String uuid, Consumer<User> callback) {
-        getMCUserByUUID(uuid,mcUser -> callback.accept(mcUser.getUser()));
+    public CompletableFuture<User> getUserByUUID(String uuid) {
+        return getMCUserByUUID(uuid).thenApply(MCUser::getUser);
     }
 
     /**
@@ -45,16 +45,12 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
      * Will result in null, if nobody linked a minecraft account with that uuid.
      *
      * @param uuid The UUID, with dashes.
-     * @param callback A callback that receives the fetched MCUser.
+     * @return A completable future that will contain the MCUser.
      */
-    public void getMCUserByUUID(String uuid, Consumer<MCUser> callback) {
-        api.post("api/mc/user", object().set("uuid", uuid).createObject(), resp -> {
-            if(resp.getResponseCode() != 200) {
-                callback.accept(null);
-                return;
-            }
-
-            callback.accept(resp.getResponseAs(MCUser.class));
+    public CompletableFuture<MCUser> getMCUserByUUID(String uuid) {
+        return api.post("api/mc/user", object().set("uuid", uuid).createObject()).thenApply(resp -> {
+            if(resp.getResponseCode() != 200) return null;
+            else return resp.getResponseAs(MCUser.class);
         });
     }
 
@@ -64,16 +60,12 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
      * or if there is no account with that id.
      *
      * @param userId The user id of the LCLPNetwork user account to fetch the MCUser from.
-     * @param callback A callback that receives the fetched MCUser.
+     * @return A completable future that will contain the MCUser.
      */
-    public void getMCUserByUserId(long userId, Consumer<MCUser> callback) {
-        api.post("api/mc/user-by-user-id", object().set("userId", userId).createObject(), resp -> {
-            if(resp.getResponseCode() != 200) {
-                callback.accept(null);
-                return;
-            }
-
-            callback.accept(resp.getResponseAs(MCUser.class));
+    public CompletableFuture<MCUser> getMCUserByUserId(long userId) {
+        return api.post("api/mc/user-by-user-id", object().set("userId", userId).createObject()).thenApply(resp -> {
+            if(resp.getResponseCode() != 200) return null;
+            else return resp.getResponseAs(MCUser.class);
         });
     }
 
@@ -82,16 +74,12 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
      * Will result in null, if no minecraft account with that uuid is tracked by LCLPNetwork.'.
      *
      * @param uuid The UUID, with dashes.
-     * @param callback A callback that receives the fetched MCPlayer.
+     * @return A completable future that will contain the MCPlayer.
      */
-    public void getMCPlayerByUUID(String uuid, Consumer<MCPlayer> callback) {
-        api.post("api/mc/player", object().set("uuid",uuid).createObject(), resp -> {
-            if(resp.getResponseCode() != 200) {
-                callback.accept(null);
-                return;
-            }
-
-            callback.accept(resp.getResponseAs(MCPlayer.class));
+    public CompletableFuture<MCPlayer> getMCPlayerByUUID(String uuid) {
+        return api.post("api/mc/player", object().set("uuid",uuid).createObject()).thenApply(resp -> {
+            if(resp.getResponseCode() != 200) return null;
+            else return resp.getResponseAs(MCPlayer.class);
         });
     }
 
@@ -100,16 +88,12 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
      * Will result in null, if there is no MCPlayer with that id.
      *
      * @param playerId The id of the MCPlayer.
-     * @param callback A callback that receives the fetched MCPlayer.
+     * @return A completable future that will contain the MCPlayer.
      */
-    public void getMCPlayerById(long playerId, Consumer<MCPlayer> callback) {
-        api.post("api/mc/player-by-id", object().set("playerId", playerId).createObject(), resp -> {
-            if(resp.getResponseCode() != 200) {
-                callback.accept(null);
-                return;
-            }
-
-            callback.accept(resp.getResponseAs(MCPlayer.class));
+    public CompletableFuture<MCPlayer> getMCPlayerById(long playerId) {
+        return api.post("api/mc/player-by-id", object().set("playerId", playerId).createObject()).thenApply(resp -> {
+            if(resp.getResponseCode() != 200) return null;
+            else return resp.getResponseAs(MCPlayer.class);
         });
     }
 
@@ -120,16 +104,12 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
      * or is currently not tracked as player by LCLPNetwork.
      *
      * @param userId The user id of the LCLPNetwork user account to fetch the MCPlayer from.
-     * @param callback A callback that receives the fetched MCPlayer.
+     * @return A completable future that will contain the MCPlayer.
      */
-    public void getMCPlayerByUserId(long userId, Consumer<MCPlayer> callback) {
-        api.post("api/mc/player-by-user-id", object().set("userId", userId).createObject(), resp -> {
-            if(resp.getResponseCode() != 200) {
-                callback.accept(null);
-                return;
-            }
-
-            callback.accept(resp.getResponseAs(MCPlayer.class));
+    public CompletableFuture<MCPlayer> getMCPlayerByUserId(long userId) {
+        return api.post("api/mc/player-by-user-id", object().set("userId", userId).createObject()).thenApply(resp -> {
+            if(resp.getResponseCode() != 200) return null;
+            else return resp.getResponseAs(MCPlayer.class);
         });
     }
 
