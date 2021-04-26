@@ -9,10 +9,16 @@ package work.lclpnet.test;
 import org.junit.jupiter.api.Test;
 import work.lclpnet.lclpnetwork.LCLPNetworkAPI;
 import work.lclpnet.lclpnetwork.api.APIAccess;
+import work.lclpnet.lclpnetwork.api.APIAuthAccess;
 import work.lclpnet.lclpnetwork.api.APIException;
 import work.lclpnet.lclpnetwork.facade.User;
 
+import javax.annotation.Nullable;
+import java.io.*;
+import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,8 +50,10 @@ public class UserTests {
     }
 
     @Test
-    void revokeTokenMissingScopes() {
-        LCLPNetworkAPI auth = getDummyAuthAPI();
+    void revokeTokenMissingScopes() throws IOException {
+        LCLPNetworkAPI auth = getAuth();
+        assertNotNull(auth);
+
         try {
             auth.revokeCurrentToken().thenAccept(System.out::println).join();
             fail("This test should not reach this statement");
@@ -58,22 +66,50 @@ public class UserTests {
     }
 
     @Test
-    void currentUser() {
-        LCLPNetworkAPI auth = getDummyAuthAPI();
+    void currentUser() throws IOException {
+        LCLPNetworkAPI auth = getAuth();
+        assertNotNull(auth);
+
         User user = auth.getCurrentUser().join();
         assertNotNull(user);
         assertEquals(21, user.getId());
     }
 
     @Test
-    void currentUserVerified() {
-        LCLPNetworkAPI auth = getDummyAuthAPI();
+    void currentUserVerified() throws IOException {
+        LCLPNetworkAPI auth = getAuth();
+        assertNotNull(auth);
+
         Boolean verified = auth.isCurrentUserVerified().join();
         assertNotNull(verified);
         assertFalse(verified); // the dummy user's email is not verified
     }
 
-    /*private String getToken() throws IOException {
+    /* */
+
+    @Nullable
+    static LCLPNetworkAPI getAuth() throws IOException {
+        return getAuth("token", null, LCLPNetworkAPI::new);
+    }
+
+    @Nullable
+    static <T extends LCLPNetworkAPI> T getAuth(String tokenKey, String host, Function<APIAuthAccess, T> mapper) throws IOException {
+        String token = getPrivateProperty(tokenKey);
+        if (token == null) return null;
+
+        CompletableFuture<APIAuthAccess> future;
+        if (host == null) future = APIAccess.withAuth(token);
+        else {
+            APIAuthAccess access = new APIAuthAccess(token);
+            access.setHost(host);
+            future = APIAccess.withAuthCheck(access);
+        }
+
+        return future.thenApply(mapper).join();
+    }
+
+    @Nullable
+    static String getPrivateProperty(String key) throws IOException {
         File f = new File("src/test/resources/test-private.properties");
         Properties privateProps = new Properties();
         try (InputStream in = new FileInputStream(f)) {
@@ -81,16 +117,7 @@ public class UserTests {
         } catch (FileNotFoundException e) {
             return null;
         }
-        return privateProps.getProperty("token");
-    }*/
-
-    /**
-     * This is a dummy token which has basic permission to test the API.
-     */
-    private static final String DUMMY_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiZjI2NDVhMTE3NzA4YTdhMGQ0ODk2YWM0YWNjY2M4MWFlOTRmZmRiMmJlMzZkNTNlNjk3Y2EyZWIwNzU5MDA5MmM1YTllNWNjMzgyM2ExMDUiLCJpYXQiOjE2MTkzNzUwNTkuNTYxNzksIm5iZiI6MTYxOTM3NTA1OS41NjE3OTQsImV4cCI6MTY1MDkxMTA1OS41NTc2NjMsInN1YiI6IjIxIiwic2NvcGVzIjpbImlkZW50aXR5IiwiaWRlbnRpdHlbZW1haWxdIl19.iQL_JExW1mBvy0oycG2V713UJBReFms6pQgL3pW6-A4hzz7aG4ePCGWsza2riCVj174KxsB9ukk5X0tzW-WRszq8VuUOfZ8uMxuLiIicpiDq8gGZAiyeaUYOz0J6nAOreIw-4ZZDUVdF2Byy-6JrbrI-Wp6rxRfBvASp2ZKErIASHyLqXO3eg7G5oGbk3KmPIepoFJQ061DFEysgkfYVewBvq73jFNPcLH1pni1aZduzJDECi4A29qbjo6F7_3VxCrhnBcNMAHN707LzISEBecil4m-bbyEEjef6zGH8vGw_-d1dLkVicDBdSZVliDXGpkCS6VLvXrZqFDMIFO2AJZEGcbOXIpKye425bpvdm_Y1iKJ2LqAo0RP6Vlqma-xL94iHUpcb9XJTGQ0lw-6yUIrWGfv0rzA2CRK5sngQEF4A_TXI46EdgiHSRJ6RtOqpet5ejxGPXrda4RYBvnr3A8x0coo_VebzCacajPeNYYSDuA51RqtD7kZ0lcSN6Woru3MOdiE1Kb_vLJkPec4zaAbEDhTH_xwSuoa1UzKhyRWPSx-dPd4r53_o35vwtbjVOy1wp7wfETCx1AFJP3vaC5w1-uBirHroU_IGl5XpVjwckn7mixJYeyHzhpNXzGN8yPru9Ulkv6-DPm5adaPj9Uov64vK67u13KCzpRfF72o";
-
-    private LCLPNetworkAPI getDummyAuthAPI() {
-        return APIAccess.withAuth(DUMMY_TOKEN).thenApply(LCLPNetworkAPI::new).join();
+        return privateProps.getProperty(key);
     }
 
 }

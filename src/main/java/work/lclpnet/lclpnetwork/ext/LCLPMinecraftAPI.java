@@ -6,8 +6,12 @@
 
 package work.lclpnet.lclpnetwork.ext;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import work.lclpnet.lclpnetwork.LCLPNetworkAPI;
 import work.lclpnet.lclpnetwork.api.APIAccess;
+import work.lclpnet.lclpnetwork.api.annotation.AuthRequired;
+import work.lclpnet.lclpnetwork.api.annotation.Scopes;
 import work.lclpnet.lclpnetwork.facade.MCPlayer;
 import work.lclpnet.lclpnetwork.facade.MCStats;
 import work.lclpnet.lclpnetwork.facade.MCUser;
@@ -139,6 +143,20 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
         return api.post("api/mc/stats", builder.createObject()).thenApply(resp -> {
             if(resp.getResponseCode() != 200) return null;
             else return resp.getResponseAs(MCStats.class);
+        });
+    }
+
+    @AuthRequired
+    @Scopes("minecraft")
+    public CompletableFuture<String> requestMCLinkToken() {
+        return api.post("api/mc/request-mclink-token", null).thenApply(resp -> {
+            if(resp.getResponseCode() != 201) return null;
+
+            JsonObject obj = resp.getResponseAs(JsonObject.class);
+            JsonElement elem = obj.get("token");
+            if(elem == null) return null;
+
+            return elem.getAsString();
         });
     }
 
