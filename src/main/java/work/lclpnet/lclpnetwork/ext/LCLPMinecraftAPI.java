@@ -146,6 +146,15 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
         });
     }
 
+    /**
+     * Requests a MCLink token which can be sent to a LCLPNetwork minecraft server,
+     * in order to link the current {@link User} with a Minecraft account (UUID).
+     *
+     * The Minecraft server will require the player to have a valid Yggdrasil session, so that the integrity of their
+     * UUID can be verified.
+     *
+     * @return A completable future which will receive the MCLink token in form of an UUID.
+     */
     @AuthRequired
     @Scopes("minecraft")
     public CompletableFuture<String> requestMCLinkToken() {
