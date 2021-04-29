@@ -49,6 +49,13 @@ public class LCLPNetworkAPI {
     }
 
     /**
+     * @return The API access instance of this API instance.
+     */
+    public APIAccess getAPIAccess() {
+        return api;
+    }
+
+    /**
      * Gets a user by id.
      *
      * @param id The id of the user.
