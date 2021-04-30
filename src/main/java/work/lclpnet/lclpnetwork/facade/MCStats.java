@@ -164,6 +164,9 @@ public class MCStats extends JsonSerializable {
         @Expose
         private String minecraft;
 
+        public String getMinecraft() {
+            return minecraft;
+        }
     }
 
 }
