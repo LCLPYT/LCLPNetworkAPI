@@ -9,6 +9,7 @@ package work.lclpnet.test;
 import org.junit.jupiter.api.Test;
 import work.lclpnet.lclpnetwork.api.APIException;
 import work.lclpnet.lclpnetwork.ext.LCLPMinecraftAPI;
+import work.lclpnet.lclpnetwork.facade.MCStats;
 
 import java.io.IOException;
 import java.util.concurrent.CompletionException;
@@ -38,6 +39,13 @@ public class MCTests {
         assertNotNull(api);
         String token = api.requestMCLinkToken().join();
         assertNotNull(token);
+    }
+
+    @Test
+    void stats() {
+        LCLPMinecraftAPI api = LCLPMinecraftAPI.INSTANCE;
+        MCStats stats = api.getStats("7357a549-fa3e-4342-91b2-63e5e73ed39a", null).join();
+        assertNotNull(stats);
     }
 
 }

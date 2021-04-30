@@ -50,9 +50,15 @@ public class MCStats extends JsonSerializable {
         @Expose
         private String name;
         @Expose
+        private String title;
+        @Expose
+        private Icon icon;
+        @Expose
         private Map<String, Value> properties;
         @Expose
         private Map<String, JsonElement> extra;
+        @Expose
+        private List<Entry> children;
 
         public EntryType getType() {
             return type;
@@ -80,7 +86,9 @@ public class MCStats extends JsonSerializable {
         @SerializedName("general")
         GENERAL,
         @SerializedName("game")
-        GAME;
+        GAME,
+        @SerializedName("group")
+        GROUP;
 
     }
 
@@ -134,6 +142,13 @@ public class MCStats extends JsonSerializable {
         INTEGER,
         @SerializedName("date")
         DATE;
+
+    }
+
+    public static class Icon {
+
+        @Expose
+        private String minecraft;
 
     }
 
