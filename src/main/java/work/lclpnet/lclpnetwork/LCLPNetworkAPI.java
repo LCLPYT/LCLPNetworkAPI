@@ -14,7 +14,9 @@ import work.lclpnet.lclpnetwork.api.APIAccess;
 import work.lclpnet.lclpnetwork.api.annotation.AuthRequired;
 import work.lclpnet.lclpnetwork.api.annotation.Scopes;
 import work.lclpnet.lclpnetwork.facade.User;
+import work.lclpnet.lclpnetwork.util.UTCDateAdapter;
 
+import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,7 +30,7 @@ public class LCLPNetworkAPI {
 
     public static final Gson GSON = new GsonBuilder()
             .excludeFieldsWithoutExposeAnnotation()
-            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
+            .registerTypeAdapter(Date.class, new UTCDateAdapter())
             .create();
 
     /**
