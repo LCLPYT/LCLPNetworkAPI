@@ -68,6 +68,14 @@ public class MCStats extends JsonSerializable {
             return name;
         }
 
+        public String getTitle() {
+            return title;
+        }
+
+        public Icon getIcon() {
+            return icon;
+        }
+
         public Map<String, Value> getProperties() {
             return properties;
         }
@@ -76,6 +84,9 @@ public class MCStats extends JsonSerializable {
             return extra;
         }
 
+        public List<Entry> getChildren() {
+            return children;
+        }
     }
 
     /**
@@ -145,6 +156,9 @@ public class MCStats extends JsonSerializable {
 
     }
 
+    /**
+     * Used to determine the icon of an {@link Entry}.
+     */
     public static class Icon {
 
         @Expose
