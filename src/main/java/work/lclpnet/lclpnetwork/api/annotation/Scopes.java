@@ -6,15 +6,13 @@
 
 package work.lclpnet.lclpnetwork.api.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Used to mark API request methods that require specific scopes.
  * The required scopes can be checked with {@link Scopes#value()}
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Scopes {

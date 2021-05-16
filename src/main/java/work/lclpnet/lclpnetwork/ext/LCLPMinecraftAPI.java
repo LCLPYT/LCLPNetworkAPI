@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import work.lclpnet.lclpnetwork.LCLPNetworkAPI;
 import work.lclpnet.lclpnetwork.api.APIAccess;
+import work.lclpnet.lclpnetwork.api.ResponseEvaluationException;
 import work.lclpnet.lclpnetwork.api.annotation.AuthRequired;
 import work.lclpnet.lclpnetwork.api.annotation.Scopes;
 import work.lclpnet.lclpnetwork.facade.MCPlayer;
@@ -20,6 +21,7 @@ import work.lclpnet.lclpnetwork.util.JsonBuilder;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import static work.lclpnet.lclpnetwork.util.JsonBuilder.object;
 
@@ -51,7 +53,12 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
      * @return A completable future that will contain the User.
      */
     public CompletableFuture<User> getUserByUUID(String uuid) {
-        return getMCUserByUUID(uuid).thenApply(MCUser::getUser);
+        return getMCUserByUUID(uuid).thenApply(MCUser::getUser).exceptionally(ex -> { // if MCUser is null
+            if(ex instanceof CompletionException) {
+                if(ex.getCause() != null && ex.getCause() instanceof NullPointerException) return null;
+                else throw (CompletionException) ex;
+            } else throw new CompletionException(ex);
+        });
     }
 
     /**
@@ -141,7 +148,7 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
         if(modules != null) builder = builder.beginArray("modules").addAll(modules).endArray();
 
         return api.post("api/mc/stats", builder.createObject()).thenApply(resp -> {
-            if(resp.getResponseCode() != 200) return null;
+            if(resp.getResponseCode() != 200) throw new ResponseEvaluationException(resp);
             else return resp.getResponseAs(MCStats.class);
         });
     }
@@ -159,11 +166,11 @@ public class LCLPMinecraftAPI extends LCLPNetworkAPI {
     @Scopes("minecraft")
     public CompletableFuture<String> requestMCLinkToken() {
         return api.post("api/mc/request-mclink-token", null).thenApply(resp -> {
-            if(resp.getResponseCode() != 201) return null;
+            if(resp.getResponseCode() != 201) throw new ResponseEvaluationException(resp);
 
             JsonObject obj = resp.getResponseAs(JsonObject.class);
             JsonElement elem = obj.get("token");
-            if(elem == null) return null;
+            if(elem == null) throw new ResponseEvaluationException(resp);
 
             return elem.getAsString();
         });

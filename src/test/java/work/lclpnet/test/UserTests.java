@@ -37,6 +37,12 @@ public class UserTests {
     }
 
     @Test
+    void userByIdNotExisting() {
+        User user = LCLPNetworkAPI.INSTANCE.getUserById(Integer.MAX_VALUE).join();
+        assertNull(user);
+    }
+
+    @Test
     void currentUserNoAuth() {
         try {
             LCLPNetworkAPI.INSTANCE.getCurrentUser().thenAccept(System.out::println).join();

@@ -11,6 +11,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import work.lclpnet.lclpnetwork.api.APIAccess;
+import work.lclpnet.lclpnetwork.api.ResponseEvaluationException;
 import work.lclpnet.lclpnetwork.api.annotation.AuthRequired;
 import work.lclpnet.lclpnetwork.api.annotation.Scopes;
 import work.lclpnet.lclpnetwork.facade.User;
@@ -80,7 +81,7 @@ public class LCLPNetworkAPI {
     @Scopes("revoke-self")
     public CompletableFuture<Boolean> revokeCurrentToken() {
         return api.get("api/auth/revoke-token").thenApply(resp -> {
-            if(resp.getResponseCode() != 200) return null;
+            if(resp.getResponseCode() != 200) throw new ResponseEvaluationException(resp);
             else return "{\"message\":\"Successfully logged out\"}".equals(resp.getRawResponse());
         });
     }
@@ -110,11 +111,11 @@ public class LCLPNetworkAPI {
     @Scopes("identity")
     public CompletableFuture<Boolean> isCurrentUserVerified() {
         return api.get("api/auth/verified").thenApply(resp -> {
-            if(resp.getResponseCode() != 200) return null;
+            if(resp.getResponseCode() != 200) throw new ResponseEvaluationException(resp);
 
             JsonObject obj = resp.getResponseAs(JsonObject.class);
             JsonElement elem = obj.get("email_verified");
-            if(elem == null) return null;
+            if(elem == null) throw new ResponseEvaluationException(resp);
             else return elem.getAsBoolean();
         });
     }
