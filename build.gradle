@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 LCLP.
+ * Copyright (c) 2022 LCLP.
  *
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
@@ -7,35 +7,16 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'org.ajoberstar.grgit' version '4.1.0'
+    id 'gradle-build-utils' version '1.1.0'
 }
 
-ext {
-    SPEC_VERSION = '0.0'
-}
+def privateProps = loadProperties.call('private.properties')
 
-def getVersion = {
-    // TAG-offset-hash
-    def raw = grgit.describe(longDescr: true, tags:true)
-    def desc = (raw == null ? '0.0-0-unknown' : grgit.describe(longDescr: true, tags:true)).split('-') as List
-    desc.remove(desc.size() - 1)
-    def offset = desc.remove(desc.size() - 1)
-    def tag = desc.join('-')
-    def branch = grgit.branch.current().name
-    if (branch in ['master', 'HEAD'])
-        branch = null
-    SPEC_VERSION = tag
-    return "${tag}.${offset}${t -> if (branch != null) t << '-' + branch}".toString()
-}
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 
-def privateProps = new Properties()
-def privatePropsFile = file("private.properties");
-if(privatePropsFile.exists())
-    privatePropsFile.withInputStream { privateProps.load(it) }
-
-group 'work.lclpnet'
-archivesBaseName = 'lclpnetwork-api'
-version getVersion()
+archivesBaseName = project.archives_base_name
+version = gitVersion.call()
+group = project.maven_group
 
 repositories {
     mavenCentral()
@@ -66,7 +47,7 @@ java {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId = 'lclpnetwork-api'
+            artifactId = project.archives_base_name
             from components.java
 
             pom {
@@ -76,16 +57,23 @@ publishing {
             }
         }
     }
+
     repositories {
         maven {
-            if (privateProps.containsKey('mavenPassword')
-                    && privateProps.containsKey('mavenHost')
-                    && privateProps.containsKey('mavenUser')) {
+            def env = System.getenv()
+            if (Arrays.stream("DEPLOY_URL", "DEPLOY_USER", "DEPLOY_PASSWORD").allMatch(env.&containsKey)) {
                 credentials {
-                    username privateProps.getProperty('mavenUser');
-                    password privateProps.getProperty('mavenPassword');
+                    username env.get("DEPLOY_USER")
+                    password env.get("DEPLOY_PASSWORD")
                 }
-                url privateProps.getProperty('mavenHost');
+                url env.get("DEPLOY_URL")
+            }
+            else if (Arrays.stream("mavenHost", "mavenUser", "mavenPassword").allMatch(privateProps.&containsKey)) {
+                credentials {
+                    username privateProps.getProperty('mavenUser')
+                    password privateProps.getProperty('mavenPassword')
+                }
+                url privateProps.getProperty('mavenHost')
             } else {
                 url "file:///${project.projectDir}/repo"
             }

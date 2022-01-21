@@ -1,2 +1,18 @@
+/*
+ * Copyright (c) 2022 LCLP.
+ *
+ * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
+ */
+
+pluginManagement {
+    repositories {
+        maven {
+            name = 'LCLPNetwork Maven'
+            url = 'https://repo.lclpnet.work/repository/internal'
+        }
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'LCLPNetworkAPI'
 
