@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 LCLP.
+ * Copyright (c) 2022 LCLP.
  *
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
@@ -11,7 +11,7 @@ import work.lclpnet.lclpnetwork.LCLPNetworkAPI;
 import work.lclpnet.lclpnetwork.api.APIAccess;
 import work.lclpnet.lclpnetwork.api.APIAuthAccess;
 import work.lclpnet.lclpnetwork.api.APIException;
-import work.lclpnet.lclpnetwork.facade.User;
+import work.lclpnet.lclpnetwork.model.User;
 
 import javax.annotation.Nullable;
 import java.io.*;

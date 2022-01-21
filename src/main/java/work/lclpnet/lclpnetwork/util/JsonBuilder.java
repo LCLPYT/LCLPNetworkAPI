@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 LCLP.
+ * Copyright (c) 2022 LCLP.
  *
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
@@ -7,7 +7,6 @@
 package work.lclpnet.lclpnetwork.util;
 
 import com.google.gson.*;
-import work.lclpnet.lclpnetwork.LCLPNetworkAPI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -189,11 +188,11 @@ public class JsonBuilder {
     /* static methods */
 
     /**
-     * Create a new JsonObject builder using the {@link LCLPNetworkAPI#GSON} Gson instance.
+     * Create a new JsonObject builder using the {@link GsonAccess#getGson()} Gson instance.
      * @return A new JsonObject builder with the default Gson instance.
      */
     public static JsonBuilder object() {
-        return object(LCLPNetworkAPI.GSON);
+        return object(GsonAccess.getGson());
     }
 
     /**
@@ -206,11 +205,11 @@ public class JsonBuilder {
     }
 
     /**
-     * Create a new JsonArray builder using the {@link LCLPNetworkAPI#GSON} Gson instance.
+     * Create a new JsonArray builder using the {@link GsonAccess#getGson()} Gson instance.
      * @return A new JsonArray builder with the default Gson instance.
      */
     public static JsonBuilder array() {
-        return array(LCLPNetworkAPI.GSON);
+        return array(GsonAccess.getGson());
     }
 
     /**

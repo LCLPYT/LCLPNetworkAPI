@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 LCLP.
+ * Copyright (c) 2022 LCLP.
  *
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
@@ -13,10 +13,10 @@ import work.lclpnet.lclpnetwork.api.APIAccess;
 import work.lclpnet.lclpnetwork.api.ResponseEvaluationException;
 import work.lclpnet.lclpnetwork.api.annotation.AuthRequired;
 import work.lclpnet.lclpnetwork.api.annotation.Scopes;
-import work.lclpnet.lclpnetwork.facade.MCPlayer;
-import work.lclpnet.lclpnetwork.facade.MCStats;
-import work.lclpnet.lclpnetwork.facade.MCUser;
-import work.lclpnet.lclpnetwork.facade.User;
+import work.lclpnet.lclpnetwork.model.MCPlayer;
+import work.lclpnet.lclpnetwork.model.MCStats;
+import work.lclpnet.lclpnetwork.model.MCUser;
+import work.lclpnet.lclpnetwork.model.User;
 import work.lclpnet.lclpnetwork.util.JsonBuilder;
 
 import javax.annotation.Nullable;

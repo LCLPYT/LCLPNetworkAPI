@@ -1,23 +1,19 @@
 /*
- * Copyright (c) 2021 LCLP.
+ * Copyright (c) 2022 LCLP.
  *
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
 
 package work.lclpnet.lclpnetwork;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import work.lclpnet.lclpnetwork.api.APIAccess;
 import work.lclpnet.lclpnetwork.api.ResponseEvaluationException;
 import work.lclpnet.lclpnetwork.api.annotation.AuthRequired;
 import work.lclpnet.lclpnetwork.api.annotation.Scopes;
-import work.lclpnet.lclpnetwork.facade.User;
-import work.lclpnet.lclpnetwork.util.UTCDateAdapter;
+import work.lclpnet.lclpnetwork.model.User;
 
-import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,11 +24,6 @@ import static work.lclpnet.lclpnetwork.util.JsonBuilder.object;
  * @author LCLP
  */
 public class LCLPNetworkAPI {
-
-    public static final Gson GSON = new GsonBuilder()
-            .excludeFieldsWithoutExposeAnnotation()
-            .registerTypeAdapter(Date.class, new UTCDateAdapter())
-            .create();
 
     /**
      * The main instance for the public LCLPNetwork API.

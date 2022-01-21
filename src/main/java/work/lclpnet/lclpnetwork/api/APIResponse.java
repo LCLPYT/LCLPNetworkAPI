@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 LCLP.
+ * Copyright (c) 2022 LCLP.
  *
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
@@ -9,7 +9,7 @@ package work.lclpnet.lclpnetwork.api;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import work.lclpnet.lclpnetwork.facade.JsonSerializable;
+import work.lclpnet.lclpnetwork.model.JsonSerializable;
 import work.lclpnet.lclpnetwork.util.Utils;
 
 import java.io.IOException;

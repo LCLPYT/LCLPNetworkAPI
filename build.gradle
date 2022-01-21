@@ -10,7 +10,7 @@ plugins {
     id 'gradle-build-utils' version '1.1.0'
 }
 
-def privateProps = loadProperties.call('private.properties')
+def props = loadProperties.call('private.properties')
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -23,11 +23,11 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.google.code.findbugs:jsr305:3.0.0'
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'com.google.code.gson:gson:2.8.9'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 }
 
 test {
@@ -68,12 +68,12 @@ publishing {
                 }
                 url env.get("DEPLOY_URL")
             }
-            else if (Arrays.stream("mavenHost", "mavenUser", "mavenPassword").allMatch(privateProps.&containsKey)) {
+            else if (Arrays.stream("mavenHost", "mavenUser", "mavenPassword").allMatch(props.&containsKey)) {
                 credentials {
-                    username privateProps.getProperty('mavenUser')
-                    password privateProps.getProperty('mavenPassword')
+                    username props.getProperty('mavenUser') as String
+                    password props.getProperty('mavenPassword') as String
                 }
-                url privateProps.getProperty('mavenHost')
+                url props.getProperty('mavenHost') as String
             } else {
                 url "file:///${project.projectDir}/repo"
             }

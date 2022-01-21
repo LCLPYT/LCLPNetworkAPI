@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2021 LCLP.
+ * Copyright (c) 2022 LCLP.
  *
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
 
-package work.lclpnet.lclpnetwork.facade;
+package work.lclpnet.lclpnetwork.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.JsonAdapter;

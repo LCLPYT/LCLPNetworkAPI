@@ -1,15 +1,15 @@
 /*
- * Copyright (c) 2021 LCLP.
+ * Copyright (c) 2022 LCLP.
  *
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
 
-package work.lclpnet.lclpnetwork.facade;
+package work.lclpnet.lclpnetwork.model;
 
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import work.lclpnet.lclpnetwork.LCLPNetworkAPI;
+import work.lclpnet.lclpnetwork.util.GsonAccess;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -130,7 +130,7 @@ public class MCStats extends JsonSerializable {
         }
 
         public Date getAsDate() {
-            return isNull() ? null : LCLPNetworkAPI.GSON.fromJson(value, Date.class);
+            return isNull() ? null : GsonAccess.getGson().fromJson(value, Date.class);
         }
 
         public String getValueAsFormattedString() {

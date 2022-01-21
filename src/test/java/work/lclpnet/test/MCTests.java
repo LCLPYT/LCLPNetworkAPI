@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 LCLP.
+ * Copyright (c) 2022 LCLP.
  *
  * Licensed under the MIT License. For more information, consider the LICENSE file in the project's root directory.
  */
@@ -9,7 +9,7 @@ package work.lclpnet.test;
 import org.junit.jupiter.api.Test;
 import work.lclpnet.lclpnetwork.api.APIException;
 import work.lclpnet.lclpnetwork.ext.LCLPMinecraftAPI;
-import work.lclpnet.lclpnetwork.facade.MCStats;
+import work.lclpnet.lclpnetwork.model.MCStats;
 
 import java.io.IOException;
 import java.util.concurrent.CompletionException;
